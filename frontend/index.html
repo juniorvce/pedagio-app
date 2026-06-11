@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0f172a"/><meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Pedágio App</title><link rel="manifest" href="/static/manifest.json"/>
+<link rel="icon" href="/static/icons/icon-192.png"/><link rel="stylesheet" href="/static/css/app.css"/></head>
+<body>
+<header class="header"><div class="header-inner"><div class="logo"><span class="logo-icon">🚗</span>
+<div><h1>Pedágio App</h1><p>Ultrapasse / MercadoPago</p></div></div><span class="badge">PWA v1.0</span></div></header>
+<main class="main"><div class="grid">
+<div class="card"><div class="card-header"><span class="card-icon">📂</span>
+<div><h2>Comprovantes PDF</h2><small>Arraste ou selecione os arquivos</small></div></div>
+<div class="drop-zone" id="dropZone"><div class="drop-icon">📄</div>
+<p class="drop-text">Arraste PDFs aqui</p><p class="drop-sub">ou clique para selecionar</p>
+<input type="file" id="fileInput" multiple accept=".pdf,application/pdf" hidden/></div>
+<div class="file-list" id="fileList" style="display:none">
+<div class="file-list-header"><span id="fileCount">0 arquivo(s)</span>
+<button class="btn-ghost btn-sm" onclick="clearFiles()">Limpar</button></div>
+<ul id="fileItems"></ul></div>
+<div class="actions"><button class="btn-primary" onclick="document.getElementById('fileInput').click()">Adicionar PDFs</button></div></div>
+<div class="card"><div class="card-header"><span class="card-icon">📊</span>
+<div><h2>Resumo</h2><small>IDA 08-12h · VOLTA 15-19h</small></div></div>
+<div class="stats-grid">
+<div class="stat-card"><span class="stat-num" id="s-total" style="color:#3b82f6">0</span><span class="stat-lbl">Total</span></div>
+<div class="stat-card"><span class="stat-num" id="s-ida" style="color:#22c55e">0</span><span class="stat-lbl">IDA</span></div>
+<div class="stat-card"><span class="stat-num" id="s-volta" style="color:#f59e0b">0</span><span class="stat-lbl">VOLTA</span></div>
+<div class="stat-card"><span class="stat-num" id="s-indef" style="color:#94a3b8">0</span><span class="stat-lbl">Indef.</span></div>
+<div class="stat-card"><span class="stat-num" id="s-erro" style="color:#ef4444">0</span><span class="stat-lbl">Erros</span></div></div>
+<a id="downloadBtn" class="btn-success" style="display:none" href="#" download="planilha_preenchida.xlsx">Baixar Planilha Excel</a></div></div>
+<div class="card card-full"><div class="card-header"><span class="card-icon">📜</span>
+<div><h2>Log de execução</h2></div>
+<div class="terminal-dots"><span style="color:#ef4444">●</span><span style="color:#f59e0b">●</span><span style="color:#22c55e">●</span></div></div>
+<div class="terminal" id="terminal">
+<div class="t-line t-muted">Pedagio App PWA pronto.</div>
+<div class="t-line t-muted">Adicione PDFs e clique em Processar.</div></div>
+<button class="btn-ghost btn-sm" style="margin-top:8px" onclick="clearLog()">Limpar log</button></div>
+</main>
+<footer class="footer"><div class="footer-inner">
+<button class="btn-process" id="btnProcess" onclick="processar()">
+🚀 <span id="btnText">PROCESSAR COMPROVANTES</span></button></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></footer>
+<div class="toast" id="toast"></div>
+<script src="/static/js/app.js"></script></body></html>
