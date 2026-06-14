@@ -1,2 +1,2 @@
-# pedagio-app
-App PWA para processamento de comprovantes de pedagio Ultrapasse/MercadoPago
+# Pedagio App
+App FastAPI para preencher planilha de pedagio com comprovantes PDF, no padrao do gabarito.
