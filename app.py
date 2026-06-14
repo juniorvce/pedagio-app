@@ -65,34 +65,41 @@ def health(): return {"status":"ok"}
 
 @app.post("/api/processar")
 async def processar(modelo: UploadFile = File(...), pdfs: list[UploadFile] = File(...)):
-    job=str(uuid.uuid4())[:8]; jd=OUT/job; imgdir=jd/"imgs"; imgdir.mkdir(parents=True)
-    modelo_bytes=await modelo.read()
-    regs=[]; stats={"IDA":0,"VOLTA":0,"INDEFINIDO":0}; logs=[]
-    for i,pf in enumerate(pdfs):
-        raw=await pf.read()
-        if not is_pdf(pf.filename,raw): logs.append(f"Ignorado: {pf.filename}"); continue
-        d=extrair(raw); stats[d["direcao"]]+=1; nome=fmt_nome(d)
-        try:
-            pages=convert_from_bytes(raw,dpi=200,fmt="png")
-            p=imgdir/f"{i:03d}_{nome}"; pages[0].save(p,"PNG",optimize=True)
-            regs.append({"d":d,"nome":nome,"path":str(p)}); logs.append(f"OK {pf.filename} -> {nome} [{d['direcao']}]")
-        except Exception as e: logs.append(f"ERRO {pf.filename}: {e}")
-    if not regs: raise HTTPException(400,"Nenhum PDF valido.")
-    regs.sort(key=chave)
-    wb=openpyxl.load_workbook(io.BytesIO(modelo_bytes)); ws=wb.active; total=len(regs)
-    if total>8: ws.insert_rows(121,amount=22); logs.append(f"{total} (>8): +22 linhas.")
-    else: logs.append(f"{total} (<=8): planilha INTACTA.")
-    for idx,reg in enumerate(regs):
-        if idx>=12: logs.append(f"Limite 12. {reg['nome']} ignorado."); continue
-        inserir(ws,reg["path"],SLOTS[idx%4],FILEIRAS[idx//4])
-        logs.append(f"[{idx+1:02d}] {reg['nome']} -> slot {idx%4+1}, fileira {idx//4+1}")
-    xlsx=jd/"Planilha_Preenchida.xlsx"; wb.save(str(xlsx))
-    zp=jd/"Resultado.zip"
-    with zipfile.ZipFile(zp,"w",zipfile.ZIP_DEFLATED) as zf:
-        zf.write(str(xlsx),"Planilha_Preenchida.xlsx")
-        for reg in regs: zf.write(reg["path"],f"Imagens/{reg['nome']}")
-    return JSONResponse({"job":job,"resumo":{"total":total,**{k.lower():v for k,v in stats.items()}},
-        "logs":logs,"xlsx":f"/api/baixar/{job}/xlsx","zip":f"/api/baixar/{job}/zip"})
+  import traceback
+  try:
+      job=str(uuid.uuid4())[:8]; jd=OUT/job; imgdir=jd/"imgs"; imgdir.mkdir(parents=True)
+      modelo_bytes=await modelo.read()
+      regs=[]; stats={"IDA":0,"VOLTA":0,"INDEFINIDO":0}; logs=[]
+      for i,pf in enumerate(pdfs):
+          raw=await pf.read()
+          if not is_pdf(pf.filename,raw): logs.append(f"Ignorado: {pf.filename}"); continue
+          d=extrair(raw); stats[d["direcao"]]+=1; nome=fmt_nome(d)
+          try:
+              pages=convert_from_bytes(raw,dpi=200,fmt="png")
+              p=imgdir/f"{i:03d}_{nome}"; pages[0].save(p,"PNG",optimize=True)
+              regs.append({"d":d,"nome":nome,"path":str(p)}); logs.append(f"OK {pf.filename} -> {nome} [{d['direcao']}]")
+          except Exception as e: logs.append(f"ERRO {pf.filename}: {e}")
+      if not regs: raise HTTPException(400,"Nenhum PDF valido.")
+      regs.sort(key=chave)
+      wb=openpyxl.load_workbook(io.BytesIO(modelo_bytes)); ws=wb.active; total=len(regs)
+      if total>8: ws.insert_rows(121,amount=22); logs.append(f"{total} (>8): +22 linhas.")
+      else: logs.append(f"{total} (<=8): planilha INTACTA.")
+      for idx,reg in enumerate(regs):
+          if idx>=12: logs.append(f"Limite 12. {reg['nome']} ignorado."); continue
+          inserir(ws,reg["path"],SLOTS[idx%4],FILEIRAS[idx//4])
+          logs.append(f"[{idx+1:02d}] {reg['nome']} -> slot {idx%4+1}, fileira {idx//4+1}")
+      xlsx=jd/"Planilha_Preenchida.xlsx"; wb.save(str(xlsx))
+      zp=jd/"Resultado.zip"
+      with zipfile.ZipFile(zp,"w",zipfile.ZIP_DEFLATED) as zf:
+          zf.write(str(xlsx),"Planilha_Preenchida.xlsx")
+          for reg in regs: zf.write(reg["path"],f"Imagens/{reg['nome']}")
+      return JSONResponse({"job":job,"resumo":{"total":total,**{k.lower():v for k,v in stats.items()}},
+          "logs":logs,"xlsx":f"/api/baixar/{job}/xlsx","zip":f"/api/baixar/{job}/zip"})
+
+  except HTTPException:
+    raise
+  except Exception as e:
+    return JSONResponse(status_code=500, content={"erro": str(e), "trace": traceback.format_exc()[-1200:]})
 
 @app.get("/api/baixar/{job}/{tipo}")
 def baixar(job:str,tipo:str):
@@ -146,7 +153,7 @@ async function proc(){
   const fd=new FormData();fd.append('modelo',mo);for(const f of pf)fd.append('pdfs',f);
   try{
     const r=await fetch('/api/processar',{method:'POST',body:fd});const j=await r.json();
-    if(!r.ok){log('ERRO: '+(j.detail||r.statusText));return;}
+    if(!r.ok){log('ERRO '+r.status+': '+(j.erro||j.detail||r.statusText));if(j.trace)log(j.trace);btn.disabled=false;btn.textContent='\ud83d\ude80 PROCESSAR';return;}
     (j.logs||[]).forEach(log);
     document.getElementById('s-total').textContent=j.resumo.total||0;
     document.getElementById('s-ida').textContent=j.resumo.ida||0;
