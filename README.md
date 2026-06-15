@@ -1,2 +1,5 @@
 # Pedagio App
-App FastAPI para preencher planilha de pedagio com comprovantes PDF, no padrao do gabarito.
+
+App para controle e upload de comprovantes.
+
+Deploy pronto para Render/Vercel.
