@@ -139,10 +139,11 @@ button:hover{background:#2563eb}button:disabled{background:#334155;cursor:not-al
 <div class="sb"><span id="s-total" style="color:#3b82f6">0</span><small>Total</small></div>
 <div class="sb"><span id="s-ida" style="color:#22c55e">0</span><small>IDA</small></div>
 <div class="sb"><span id="s-volta" style="color:#f59e0b">0</span><small>VOLTA</small></div></div>
-<button id="btn" onclick="proc()">&#128640; PROCESSAR</button>
+<button id="btn" type="button">&#128640; PROCESSAR</button>
 <div class="dl" id="dl"><a id="dl-xlsx" href="#">&#11015; Planilha</a><a id="dl-zip" href="#">&#11015; ZIP completo</a></div>
 </div><div id="log">Aguardando arquivos...</div></div>
 <script>
+window.onerror = function(msg, url, line) { log("JS Erro: " + msg + " linha " + line); };
 function log(m){var l=document.getElementById('log');l.textContent+="\n"+m;l.scrollTop=l.scrollHeight;}
 async function proc(){
   var mo=document.getElementById('modelo').files[0];var pf=document.getElementById('pdfs').files;
@@ -162,6 +163,10 @@ async function proc(){
     document.getElementById('dl').style.display='flex';log('\nConcluido!');
   }catch(e){log('Falha: '+e.message);}finally{btn.disabled=false;btn.textContent='PROCESSAR';}
 }
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("btn").addEventListener("click", proc);
+  log("App pronto. Selecione os arquivos.");
+});
 </script></body></html>"""
 
 if __name__ == "__main__":
