@@ -13,8 +13,8 @@ app = FastAPI(title="Pedagio App")
 HERE = Path(__file__).parent
 OUT = HERE / "outputs"; OUT.mkdir(exist_ok=True)
 
-SLOTS = [(1,213120,3,457560),(4,159480,6,533520),(7,52560,8,513000),(8,802440,10,1089720)]
-FILEIRAS = [(79,71100,99,86400),(100,38160,120,53460),(122,6480,142,21780)]
+SLOTS = [(1,198000,3,363960), (4,173880,6,469440), (7,149760,8,531000), (9,210960,10,1239480)]
+FILEIRAS = [(79,83520,99,69480), (100,59760,120,45720)]
 
 def is_pdf(name, raw): return name.lower().endswith(".pdf") or raw[:5]==b"%PDF-"
 
